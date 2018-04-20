@@ -32,28 +32,14 @@ object Decode {
       .or(Decoder[CNil].map(cnil => Coproduct[Foo :+: Bar :+: CNil](???)))(hcursor)
   }
 
-  def decodeCoproduct[H, T <: Coproduct](
+  implicit def decodeCoproduct[H, T <: Coproduct](
     implicit HDecoder: Lazy[Decoder[H]], 
-    TDecoder: Decoder[T],
-    HMe: ToHList[T]
+    TDecoder: Decoder[T]
     ): Decoder[H :+: T] = {
-      val coproductMapper: T => H :+: T = ???
-
-
-      Decoder.instance[H :+: T]{hlist => 
-        HDecoder.value.map(h => Coproduct[H :+: T](h))
-          .or(TDecoder.map(coproductMapper))(hlist)
-      }
+      HDecoder.value.map(Inl(_)).or(TDecoder.map(Inr(_)))
     }
 
-  // def decodeOut[C](p: Poly[HCursor, C <: Coproduct])
-
-
-
-  // val coproductDecoder : Decoder[Foo :+: Bar :+: CNil] = 
-  implicit def coproductDecoder[C <: Coproduct](implicit HMe: ToHList[C]): Decoder[C] = {
-    ??? 
-  }
+  val coprodcutDecoder : Decoder[Foo :+: Bar :+: CNil] = Decoder[Foo :+: Bar :+: CNil]
 
 
 }
